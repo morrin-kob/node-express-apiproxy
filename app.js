@@ -25,7 +25,7 @@ exports.corsCheck = (req, res) => {
   if (
     origin === "http://0.0.0.0:9229" || //process.env.FRONTEND_ORIGIN  // https://front-end.com
     /^https:\/\/.+\.front-end\.com$/.test(origin) ||
-    /^https:\/\/efrdcz\.csb\.app/.test(origin)
+    /^https:\/\/gwqn4g\.csb\.app/.test(origin)
   ) {
     res.header("Access-Control-Allow-Origin", origin);
     if (req.method === "OPTIONS") {
