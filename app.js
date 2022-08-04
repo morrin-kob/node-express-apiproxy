@@ -81,14 +81,14 @@ function reformResponse(resp) {
     }
   }
 
-  let scInMessage = 200;
+  let scInMessage = "400";
   if (data.message) {
     if (data.message.match(/status code (\d+)/)) {
       scInMessage = RegExp.$1;
     }
   }
   let statusCode = data.status || data.statusCode || scInMessage;
-  if (statusCode >= 400) {
+  if (parseInt(statusCode, 10) >= 400) {
     data["error"] =
       data.statusMessage ||
       data.statusText ||
