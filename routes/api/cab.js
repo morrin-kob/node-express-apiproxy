@@ -132,34 +132,29 @@ const apiGet = async (req) => {
   }
   return resp;
 };
+
+const respond = (res, resp) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  res.status(resp.statusCode).send(JSON.stringify(resp));
+};
+
 /*
   headers: x-atoken: <ACCESS_TOKEN>
 */
 router.get("/:what/:target/:id", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-
-  resp = await apiGet(req);
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+  let resp = await apiGet(req);
+  respond(res, resp);
 });
 
 router.get("/:what/:target", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-
-  resp = await apiGet(req);
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+  let resp = await apiGet(req);
+  respond(res, resp);
 });
 
 router.get("/:what", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-
-  resp = await apiGet(req);
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+  let resp = await apiGet(req);
+  respond(res, resp);
 });
 
 const apiPost = async (req) => {
@@ -193,41 +188,48 @@ const apiPost = async (req) => {
   POST: 
 */
 router.post("/:what/:target/:id", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-  if (!req.query.ept || req.query.ept.length === 0) {
-    resp = { statusCode: 400, error: "need to set ept" };
-  } else {
-    resp = await apiPost(req);
-  }
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+  let resp = await apiPost(req);
+  respond(res, resp);
 });
 router.post("/:what/:target", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-  if (!req.query.ept || req.query.ept.length === 0) {
-    resp = { statusCode: 400, error: "need to set ept" };
-  } else {
-    resp = await apiPost(req);
-  }
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
+router.post("/:what", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
 });
 
-router.post("/:what", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-  if (!req.query.ept || req.query.ept.length === 0) {
-    resp = { statusCode: 400, error: "need to set ept" };
-  } else {
-    resp = await apiPost(req);
-  }
+/*
+  PUT: 
+*/
+router.put("/:what/:target/:id", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
+router.put("/:what/:target", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
+router.put("/:what", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.status(resp.statusCode).send(JSON.stringify(resp));
+/*
+  DELETE: 
+*/
+router.delete("/:what/:target/:id", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
+router.delete("/:what/:target", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
+});
+router.delete("/:what", async function (req, res, next) {
+  let resp = await apiPost(req);
+  respond(res, resp);
 });
 
 module.exports = router;
