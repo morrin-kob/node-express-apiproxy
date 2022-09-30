@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 
 var exf = require("../../app.js");
+var exm = require("../../match_fields");
 
 /**
  * OPTIONSメソッドの実装
@@ -20,39 +21,10 @@ router.options("/:what/:target/:id", function (req, res) {
 });
 
 /*
-  get access-token (for test)
-  scd, cid, csr, uag, ept
-*/
-router.get("/token", async function (req, res, next) {
-  let resp = { error: "something is wrong" };
-  if (!req.query.scd || req.query.scd.length === 0) {
-    resp = { error: "no auth-code :" + JSON.stringify(req.query) };
-  } else {
-    let params = {
-      user_agent: req.query.uag,
-      hdr_conttype: "application/x-www-form-urlencoded"
-    };
-    let data = {
-      grant_type: "authorization_code",
-      code: req.query.scd,
-      client_id: req.query.cid,
-      client_secret: req.query.csr,
-      responce_type: "code",
-      redirect_uri: ""
-    };
-    resp = await exf.httpPost(req.query.ept + "/token", params, data);
-  }
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  res.send(JSON.stringify(resp));
-});
-
-/*
   POST: getting access-token
   scd, cid, csr, uag, ept
 */
-router.post("/token", async function (req, res, next) {
+const getToken = async (req, res) => {
   let resp = { error: "something is wrong" };
 
   let ept = req.header("X-ept") || req.body.ept;
@@ -95,14 +67,8 @@ router.post("/token", async function (req, res, next) {
     //console.log(`POST-${ept}/token\n${JSON.stringify(data)}`);
     resp = await exf.httpPost(`${ept}/token`, params, data);
   }
-
-  //console.log(`get-token:resp():${ept}/token: ${JSON.stringify(resp)}`);
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/json");
-  if ("statusCode" in resp && resp.statusCode >= 400) {
-    res.status(resp.statusCode).send(JSON.stringify(resp));
-  } else res.send(JSON.stringify(resp));
-});
+  return resp;
+};
 
 const apiGet = async (req) => {
   let resp = { error: "something is wrong" };
@@ -157,7 +123,7 @@ router.get("/:what", async function (req, res, next) {
   respond(res, resp);
 });
 
-const apiPost = async (req) => {
+const apiPost = async (req, method = "POST") => {
   let resp = { error: "something is wrong" };
 
   let ept = req.header("x-ept") || req.query.ept;
@@ -168,17 +134,21 @@ const apiPost = async (req) => {
     resp = { error: "need to set atk" };
   } else {
     let params = {
-      access_token: a_token
+      access_token: a_token,
+      method: method
     };
     if (req.query.uag) {
       params["user_agent"] = req.query.uag;
     }
+    let ifmatch = req.header("If-Match");
+    if (ifmatch) params["If-Match"] = ifmatch;
     let what = req.params.what;
     let target = req.params.target;
     let id = req.params.id;
-    let url = `${ept}/${what}`;
-    if (target) url += `/${target}`;
+    let url = `${ept}/${what}/`;
+    if (target) url += `${target}`;
     if (id) url += `/${id}`;
+    //console.log(`${method}:${url}`);
     resp = await exf.httpPost(url, params, req.body);
   }
   return resp;
@@ -196,7 +166,14 @@ router.post("/:what/:target", async function (req, res, next) {
   respond(res, resp);
 });
 router.post("/:what", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp;
+  if (req.params.what === "token") {
+    resp = await getToken(req, res);
+  } else if (req.params.what === "fmatching") {
+    resp = exm.matchFields(req);
+  } else {
+    resp = await apiPost(req);
+  }
   respond(res, resp);
 });
 
@@ -204,15 +181,15 @@ router.post("/:what", async function (req, res, next) {
   PUT: 
 */
 router.put("/:what/:target/:id", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "PUT");
   respond(res, resp);
 });
 router.put("/:what/:target", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "PUT");
   respond(res, resp);
 });
 router.put("/:what", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "PUT");
   respond(res, resp);
 });
 
@@ -220,15 +197,15 @@ router.put("/:what", async function (req, res, next) {
   DELETE: 
 */
 router.delete("/:what/:target/:id", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "DELETE");
   respond(res, resp);
 });
 router.delete("/:what/:target", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "DELETE");
   respond(res, resp);
 });
 router.delete("/:what", async function (req, res, next) {
-  let resp = await apiPost(req);
+  let resp = await apiPost(req, "DELETE");
   respond(res, resp);
 });
 

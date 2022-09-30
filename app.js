@@ -31,9 +31,9 @@ exports.corsCheck = (req, res) => {
     if (req.method === "OPTIONS") {
       res.header(
         "Access-Control-Allow-Headers",
-        "X-atk, X-ept, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept"
+        "X-atk, X-ept, If-Match, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept"
       );
-      res.header("Access-Control-Allow-Methods", "POST, PUT, DELETE, OPTIONS");
+      res.header("Access-Control-Allow-Methods", "POST,PUT,DELETE,OPTIONS");
       res.header("Access-Control-Allow-Credentials", true);
     }
     return true;
@@ -81,7 +81,7 @@ function reformResponse(resp) {
     }
   }
 
-  let scInMessage = "400";
+  let scInMessage = "500";
   if (data.message) {
     if (data.message.match(/status code (\d+)/)) {
       scInMessage = RegExp.$1;
@@ -174,6 +174,9 @@ exports.httpPost = async (url, params, postdata) => {
   }
   if (params.access_token) {
     headers["Authorization"] = "Bearer " + params.access_token;
+  }
+  if ("If-Match" in params) {
+    headers["If-Match"] = params["If-Match"];
   }
 
   let response = { status: "nothing" };
